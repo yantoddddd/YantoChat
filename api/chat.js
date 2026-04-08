@@ -5,11 +5,10 @@ const CHAT_ID = '-1003749023921';
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     
-    if (req.method === 'GET') {
+    // 🔥 TEST ENDPOINT (biar gak 404)
+    if (req.method === 'GET' && req.url === '/api/chat') {
         try {
-            const response = await fetch(
-                `https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?limit=50`
-            );
+            const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?limit=50`);
             const data = await response.json();
             
             if (data.ok) {
@@ -20,7 +19,6 @@ export default async function handler(req, res) {
                         const text = msg.text;
                         const from = msg.from.username || msg.from.first_name || 'anonymous';
                         const timestamp = msg.date;
-                        
                         const toMatch = text.match(/- to \(([^)]+)\)/);
                         const targetUser = toMatch ? toMatch[1] : null;
                         const content = text.replace(/- to \([^)]+\)/, '').trim();
@@ -30,8 +28,7 @@ export default async function handler(req, res) {
                             from: from,
                             to: targetUser,
                             message: content,
-                            timestamp: timestamp,
-                            raw: text
+                            timestamp: timestamp
                         });
                     }
                 }
@@ -43,7 +40,8 @@ export default async function handler(req, res) {
         }
     }
     
-    if (req.method === 'POST') {
+    // 🔥 KIRIM PESAN
+    if (req.method === 'POST' && req.url === '/api/chat') {
         const { username, to, message } = req.body;
         
         if (!username || !to || !message) {
@@ -55,10 +53,7 @@ export default async function handler(req, res) {
             const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: CHAT_ID,
-                    text: formattedMessage
-                })
+                body: JSON.stringify({ chat_id: CHAT_ID, text: formattedMessage })
             });
             const data = await response.json();
             
@@ -72,5 +67,6 @@ export default async function handler(req, res) {
         }
     }
     
-    return res.status(405).json({ error: 'Method not allowed' });
-                }
+    // 🔥 404 buat endpoint lain
+    return res.status(404).json({ error: 'Endpoint tidak ditemukan' });
+}
