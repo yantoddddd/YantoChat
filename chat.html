@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>YantoChat - Stay Login</title>
+    <title>YantoChat - Channel DB</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: system-ui; background: #17212b; height: 100vh; display: flex; justify-content: center; align-items: center; }
@@ -74,17 +74,17 @@
 </div>
 
 <script>
-    // 🔥 KONFIGURASI
-    const BOT1_TOKEN = '8606015215:AAF0ECEhBqchYwOlgGuwRQD9ggJvhKVYszU';
-    const BOT2_TOKEN = '8696412856:AAFHHyzynN0k_hCNj8F4mR8QBfbNPFxiUDk';
-    const CHAT_ID = '-1003749023921';
+    // 🔥 KONFIGURASI FINAL
+    const BOT1_TOKEN = '8606015215:AAF0ECEhBqchYwOlgGuwRQD9ggJvhKVYszU';  // Pengirim
+    const BOT2_TOKEN = '8696412856:AAFHHyzynN0k_hCNj8F4mR8QBfbNPFxiUDk';  // Pembaca
+    const CHAT_ID = '-1002806265297';  // 🔥 CHANNEL ID BARU
     
     let currentUser = null;
     let currentChatWith = null;
     let allMessages = [];
     let users = [];
     
-    // 🔥 CEK SESSION DI LOCALSTORAGE
+    // Cek session di localStorage
     function checkSession() {
         const savedUser = localStorage.getItem('yanto_user');
         if (savedUser) {
@@ -113,8 +113,6 @@
                 }
                 users = Array.from(userMap.entries()).map(([u, p]) => ({ username: u, password: p }));
                 console.log('✅ Users loaded:', users);
-            } else {
-                console.error('Gagal load users:', data);
             }
         } catch(e) { console.error(e); }
     }
@@ -182,8 +180,6 @@
                 allMessages = msgs;
                 renderChatList();
                 if (currentChatWith) renderMessages();
-            } else {
-                console.error('Gagal load messages:', data);
             }
         } catch(e) { console.error(e); }
     }
@@ -291,7 +287,6 @@
         return div.innerHTML;
     }
     
-    // 🔥 CEK SESSION SAAT PERTAMA BUKA
     checkSession();
 </script>
 </body>
