@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>YantoChat - Database via Telegram</title>
+    <title>YantoChat - Bot Baru</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -96,14 +96,15 @@
 </div>
 
 <script>
+    // 🔥 KONFIGURASI UPDATED
     const BOT1_TOKEN = '8606015215:AAF0ECEhBqchYwOlgGuwRQD9ggJvhKVYszU';
-    const BOT2_TOKEN = '8236149325:AAGDPsOD5HuK-sVcGaEE-v80QKd60A_9ehU';
+    const BOT2_TOKEN = '8696412856:AAFHHyzynN0k_hCNj8F4mR8QBfbNPFxiUDk';  // Bot baru sebagai pembaca
     const CHAT_ID = '-1003749023921';
     
     let currentUser = null;
     let currentChatWith = null;
     let allMessages = [];
-    let users = []; // dari Telegram
+    let users = [];
     
     async function loadUsersFromTelegram() {
         try {
@@ -121,6 +122,7 @@
                     }
                 }
                 users = Array.from(userMap.entries()).map(([u, p]) => ({ username: u, password: p }));
+                console.log('✅ Users loaded:', users);
             }
         } catch(e) { console.error(e); }
     }
@@ -295,4 +297,4 @@
     }
 </script>
 </body>
-</html>
+    </html>
