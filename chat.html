@@ -43,7 +43,7 @@
         .modal-content button { width: 100%; padding: 12px; background: #6ab04c; border: none; border-radius: 8px; color: white; cursor: pointer; font-weight: 600; margin-bottom: 8px; }
         .close-modal-btn { background: #dc2626; margin-top: 8px; }
         .hide { display: none; }
-        .error { color: #ef4444; text-align: center; margin-top: 8px; font-size: 0.8rem; }
+        .error-text { color: #ef4444; text-align: center; margin-top: 8px; font-size: 0.8rem; }
     </style>
 </head>
 <body>
@@ -62,21 +62,21 @@
             <div class="header">
                 <h1>YantoChat</h1>
                 <div class="header-buttons">
-                    <button class="add-btn" onclick="showSearchModal()">+</button>
-                    <button class="profile-btn" onclick="showProfileModal()">👤</button>
+                    <button class="add-btn" onclick="window.showSearchModal()">+</button>
+                    <button class="profile-btn" onclick="window.showProfileModal()">👤</button>
                 </div>
             </div>
             <div id="chatList" class="chat-list"></div>
         </div>
         <div id="chatDetailView" class="chat-detail">
             <div class="chat-detail-header">
-                <button class="back-btn" onclick="backToList()">←</button>
+                <button class="back-btn" onclick="window.backToList()">←</button>
                 <div><span style="font-weight:600; color:white;" id="detailUsername"></span></div>
             </div>
             <div id="messagesArea" class="messages-area"></div>
             <div class="input-area">
                 <input type="text" id="messageInput" placeholder="Ketik pesan...">
-                <button onclick="sendMsg()">Kirim</button>
+                <button onclick="window.sendMsg()">Kirim</button>
             </div>
         </div>
     </div>
@@ -94,11 +94,13 @@
     let users = [];
     
     async function sendToTelegram(text) {
-        await fetch(`https://api.telegram.org/bot${BOT1_TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: CHAT_ID, text })
-        });
+        try {
+            await fetch(`https://api.telegram.org/bot${BOT1_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: CHAT_ID, text })
+            });
+        } catch(e) { console.error(e); }
     }
     
     async function deleteUserFromTelegram(username) {
@@ -109,7 +111,7 @@
         await sendToTelegram(`REGISTER:${username}:${password}`);
     }
     
-    function showProfileModal() {
+    window.showProfileModal = function() {
         let modal = document.querySelector('#profileModal');
         if (modal) modal.remove();
         
@@ -121,16 +123,16 @@
                 <h3>Profile - ${escapeHtml(currentUser)}</h3>
                 <input type="password" id="oldPassword" placeholder="Password Lama">
                 <input type="password" id="newPassword" placeholder="Password Baru">
-                <div id="profileError" class="error"></div>
-                <button onclick="changePassword()">Ubah Password</button>
-                <button class="close-modal-btn" onclick="logout()">Logout</button>
+                <div id="profileError" class="error-text"></div>
+                <button onclick="window.changePassword()">Ubah Password</button>
+                <button class="close-modal-btn" onclick="window.logout()">Logout</button>
                 <button class="close-modal-btn" onclick="this.parentElement.parentElement.remove()">Tutup</button>
             </div>
         `;
         document.body.appendChild(modal);
-    }
+    };
     
-    async function changePassword() {
+    window.changePassword = async function() {
         const oldPassword = document.querySelector('#oldPassword')?.value.trim();
         const newPassword = document.querySelector('#newPassword')?.value.trim();
         const errorDiv = document.querySelector('#profileError');
@@ -140,7 +142,6 @@
             return;
         }
         
-        // Validasi password lama
         const user = users.find(u => u.username === currentUser);
         if (!user || user.password !== oldPassword) {
             errorDiv.textContent = 'Password lama salah!';
@@ -155,13 +156,9 @@
         errorDiv.textContent = '';
         
         try {
-            // 1. Hapus akun lama di Telegram
             await deleteUserFromTelegram(currentUser);
-            
-            // 2. Daftarkan ulang dengan password baru
             await registerToTelegram(currentUser, newPassword);
             
-            // 3. Update localStorage
             const userIndex = users.findIndex(u => u.username === currentUser);
             if (userIndex !== -1) {
                 users[userIndex].password = newPassword;
@@ -169,15 +166,13 @@
             }
             
             alert('Password berhasil diubah! Silakan login ulang.');
-            logout();
-            
+            window.logout();
         } catch (err) {
             errorDiv.textContent = 'Gagal mengubah password. Coba lagi.';
-            console.error(err);
         }
-    }
+    };
     
-    function logout() {
+    window.logout = function() {
         localStorage.removeItem('yanto_user');
         currentUser = null;
         currentChatWith = null;
@@ -187,7 +182,7 @@
         document.getElementById('authPassword').value = '';
         document.getElementById('authBtn').innerText = 'Login';
         document.getElementById('switchAuth').innerText = 'Register';
-    }
+    };
     
     function checkSession() {
         const savedUser = localStorage.getItem('yanto_user');
@@ -216,7 +211,6 @@
                     }
                 }
                 users = Array.from(userMap.entries()).map(([u, p]) => ({ username: u, password: p }));
-                console.log('Users loaded:', users);
             }
         } catch(e) { console.error(e); }
     }
@@ -304,7 +298,7 @@
         const container = document.getElementById('chatList');
         if (!container) return;
         container.innerHTML = chats.map(chat => `
-            <div class="chat-item" onclick="openChat('${chat.username}')">
+            <div class="chat-item" onclick="window.openChat('${chat.username}')">
                 <div class="avatar">${chat.username.charAt(0).toUpperCase()}</div>
                 <div class="chat-info">
                     <div class="chat-name">${escapeHtml(chat.username)}</div>
@@ -315,20 +309,20 @@
         if (chats.length === 0) container.innerHTML = '<div style="padding:20px; text-align:center; color:#8b9bb0;">Belum ada chat. Klik + untuk cari teman</div>';
     }
     
-    function openChat(username) {
+    window.openChat = function(username) {
         if (username === currentUser) return alert('Tidak bisa chat dengan diri sendiri');
         currentChatWith = username;
         document.getElementById('chatListView').style.display = 'none';
         document.getElementById('chatDetailView').style.display = 'flex';
         document.getElementById('detailUsername').innerText = username;
         renderMessages();
-    }
+    };
     
-    function backToList() {
+    window.backToList = function() {
         currentChatWith = null;
         document.getElementById('chatListView').style.display = 'flex';
         document.getElementById('chatDetailView').style.display = 'none';
-    }
+    };
     
     function renderMessages() {
         if (!currentChatWith) return;
@@ -351,7 +345,7 @@
         container.scrollTop = container.scrollHeight;
     }
     
-    async function sendMsg() {
+    window.sendMsg = async function() {
         const msg = document.getElementById('messageInput').value.trim();
         if (!msg) return;
         const formatted = `${currentUser}: ${msg} - to (${currentChatWith})`;
@@ -362,9 +356,9 @@
         });
         document.getElementById('messageInput').value = '';
         await loadMessages();
-    }
+    };
     
-    function showSearchModal() {
+    window.showSearchModal = function() {
         let modal = document.querySelector('#searchModal');
         if (modal) modal.remove();
         modal = document.createElement('div');
@@ -374,24 +368,24 @@
             <div class="modal-content">
                 <h3>Cari Pengguna</h3>
                 <input type="text" id="searchUserInput" placeholder="Username">
-                <button onclick="searchAndChat()">Chat</button>
+                <button onclick="window.searchAndChat()">Chat</button>
                 <button class="close-modal-btn" onclick="this.parentElement.parentElement.remove()">Batal</button>
             </div>
         `;
         document.body.appendChild(modal);
-    }
+    };
     
-    async function searchAndChat() {
+    window.searchAndChat = async function() {
         const searchInput = document.querySelector('#searchUserInput');
-        const targetUser = searchInput.value.trim();
+        const targetUser = searchInput?.value.trim();
         if (!targetUser) return alert('Masukkan username');
         if (targetUser === currentUser) return alert('Tidak bisa chat dengan diri sendiri');
         await loadUsersFromTelegram();
         const userExists = users.find(u => u.username === targetUser);
         if (!userExists) return alert(`User "${targetUser}" tidak ditemukan`);
-        document.querySelector('#searchModal').remove();
-        openChat(targetUser);
-    }
+        document.querySelector('#searchModal')?.remove();
+        window.openChat(targetUser);
+    };
     
     function escapeHtml(str) {
         if (!str) return '';
@@ -400,5 +394,7 @@
         return div.innerHTML;
     }
     
-    // Attach global functions
-    window
+    checkSession();
+</script>
+</body>
+</html>
