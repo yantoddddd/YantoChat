@@ -27,47 +27,24 @@
         .message.outgoing { background: #2b5270; color: white; align-self: flex-end; }
         .message.incoming { background: #1e2a36; color: #fff; align-self: flex-start; }
         .message .sender { font-size: 0.7rem; opacity: 0.7; margin-bottom: 4px; }
-        .input-area { background: #17212b; padding: 12px; display: flex; gap: 8px; border-top: 1px solid #2b3b4a; position: relative; flex-wrap: wrap; }
-        .input-row { display: flex; gap: 8px; flex: 1; }
-        .input-area input { flex: 1; padding: 10px; border: none; border-radius: 20px; background: #2b3b4a; color: white; font-size: 0.9rem; }
+        .input-area { background: #17212b; padding: 12px; display: flex; gap: 8px; border-top: 1px solid #2b3b4a; }
+        .input-area input { flex: 1; padding: 10px; border: none; border-radius: 20px; background: #2b3b4a; color: white; }
         .input-area input:focus { outline: none; }
         .input-area button { background: #6ab04c; border: none; padding: 10px 20px; border-radius: 20px; color: white; cursor: pointer; font-weight: 600; }
-        .emoji-btn { background: #2b3b4a; border: none; width: 40px; border-radius: 20px; color: white; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
-        .emoji-panel {
-            display: none;
-            background: #1e2a36;
-            border-radius: 16px;
-            padding: 12px;
-            margin-top: 8px;
-            flex-wrap: wrap;
-            gap: 8px;
-            width: 100%;
-            border: 1px solid #2b3b4a;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        .emoji-panel span {
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 6px;
-            border-radius: 8px;
-            transition: background 0.2s;
-        }
-        .emoji-panel span:hover {
-            background: #2b3b4a;
-        }
+        .emoji-btn { background: #2b3b4a; border: none; width: 40px; border-radius: 20px; color: white; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; margin-right: 8px; }
         .auth-container { display: flex; justify-content: center; align-items: center; height: 100%; padding: 20px; }
         .auth-card { background: #242f3e; border-radius: 16px; padding: 24px; width: 100%; max-width: 320px; }
         .auth-card h2 { color: white; margin-bottom: 20px; text-align: center; }
         .auth-card input { width: 100%; padding: 12px; margin-bottom: 12px; border: none; border-radius: 8px; background: #1e2a36; color: white; }
         .auth-card button { width: 100%; padding: 12px; background: #6ab04c; border: none; border-radius: 8px; color: white; cursor: pointer; }
         .switch { text-align: center; margin-top: 12px; color: #6ab04c; cursor: pointer; }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: #242f3e; border-radius: 16px; padding: 24px; width: 80%; max-width: 300px; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: #1e2a36; border-radius: 16px; padding: 20px; width: 90%; max-width: 400px; max-height: 80vh; overflow-y: auto; }
         .modal-content h3 { color: white; margin-bottom: 12px; }
-        .modal-content input { width: 100%; padding: 12px; margin-bottom: 12px; border: none; border-radius: 8px; background: #1e2a36; color: white; }
-        .modal-content button { width: 100%; padding: 12px; background: #6ab04c; border: none; border-radius: 8px; color: white; cursor: pointer; }
-        .close-modal { background: #dc2626; margin-top: 8px; }
+        .emoji-grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+        .emoji-grid span { font-size: 1.8rem; cursor: pointer; padding: 8px; border-radius: 8px; transition: background 0.2s; }
+        .emoji-grid span:hover { background: #2b3b4a; }
+        .close-modal-btn { background: #dc2626; border: none; padding: 10px; border-radius: 8px; color: white; cursor: pointer; margin-top: 16px; width: 100%; }
         .hide { display: none; }
     </style>
 </head>
@@ -100,21 +77,27 @@
             </div>
             <div id="messagesArea" class="messages-area"></div>
             <div class="input-area">
-                <div class="input-row">
-                    <button class="emoji-btn" id="emojiBtn">😊</button>
-                    <input type="text" id="messageInput" placeholder="Ketik pesan...">
-                    <button onclick="sendMsg()">Kirim</button>
-                </div>
-                <div id="emojiPanel" class="emoji-panel"></div>
+                <button class="emoji-btn" id="emojiBtn">😊</button>
+                <input type="text" id="messageInput" placeholder="Ketik pesan...">
+                <button onclick="sendMsg()">Kirim</button>
             </div>
         </div>
     </div>
 </div>
 
+<!-- MODAL EMOJI -->
+<div id="emojiModal" class="modal hide">
+    <div class="modal-content">
+        <h3>Pilih Emoji</h3>
+        <div id="emojiGrid" class="emoji-grid"></div>
+        <button class="close-modal-btn" onclick="closeEmojiModal()">Tutup</button>
+    </div>
+</div>
+
 <script>
-    // ========== DAFTAR EMOJI LENGKAP ==========
+    // ========== DAFTAR EMOJI (LENGKAP) ==========
     const emojiList = [
-        "😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "🥲", "☺️", "😊", "😇", "🙂", "🙃", "😉", "😌", "😍", "🥰", "😘", "😗", "😙", "😚", "😋", "😛", "😝", "😜", "🤪", "🤨", "🧐", "🤓", "😎", "🥸", "🤩", "🥳", "😏", "😒", "😞", "😔", "😟", "😕", "🙁", "☹️", "😣", "😖", "😫", "😩", "🥺", "😢", "😭", "😤", "😠", "😡", "🤬", "🤯", "😳", "🥵", "🥶", "😱", "😨", "😰", "😥", "😓", "🤗", "🤔", "🤭", "🤫", "🤥", "😶", "😐", "😑", "😬", "🙄", "😯", "😦", "😧", "😮", "😲", "🥱", "😴", "🤤", "😪", "😵", "🤐", "🥴", "🤢", "🤮", "🤧", "😷", "🤒", "🤕", "🤑", "🤠", "😈", "👿", "👹", "👺", "🤡", "💩", "👻", "💀", "☠️", "👽", "👾", "🤖", "🎃", "😺", "😸", "😹", "😻", "😼", "😽", "🙀", "😿", "😾", "🙈", "🙉", "🙊", "💋", "💌", "💘", "💝", "💖", "💗", "💓", "💞", "💕", "💟", "❣️", "💔", "❤️", "🧡", "💛", "💚", "💙", "💜", "🤎", "🖤", "🤍", "💯", "💢", "💥", "💫", "💦", "💨", "🕳️", "💣", "💬", "🗯️", "💭", "💤", "👋", "🤚", "🖐️", "✋", "🖖", "👌", "🤌", "🤏", "✌️", "🤞", "🫰", "🤟", "🤘", "🤙", "👈", "👉", "👆", "🖕", "👇", "☝️", "👍", "👎", "✊", "👊", "🤛", "🤜", "👏", "🙌", "🫶", "👐", "🤲", "🤝", "🙏", "✍️", "💅", "🤳", "💪", "🦾", "🦿", "🦵", "🦶", "👂", "🦻", "👃", "🧠", "🫀", "🫁", "🦷", "🦴", "👀", "👁️", "👅", "👄", "🫦", "👶", "🧒", "👦", "👧", "🧑", "👩", "🧔", "👨", "🧔‍♂️", "👩‍🦰", "👨‍🦰", "👩‍🦱", "👨‍🦱", "👩‍🦳", "👨‍🦳", "👩‍🦲", "👨‍🦲", "🧑‍🦰", "🧑‍🦱", "🧑‍🦳", "🧑‍🦲", "👱", "👱‍♂️", "👱‍♀️", "👳", "👳‍♂️", "👳‍♀️", "👲", "🧕", "👮", "👮‍♂️", "👮‍♀️", "👷", "👷‍♂️", "👷‍♀️", "💂", "💂‍♂️", "💂‍♀️", "🕵️", "🕵️‍♂️", "🕵️‍♀️", "👩‍⚕️", "👨‍⚕️", "👩‍🌾", "👨‍🌾", "👩‍🍳", "👨‍🍳", "👩‍🎓", "👨‍🎓", "👩‍🎤", "👨‍🎤", "👩‍🏫", "👨‍🏫", "👩‍🏭", "👨‍🏭", "👩‍💻", "👨‍💻", "👩‍💼", "👨‍💼", "👩‍🔧", "👨‍🔧", "👩‍🔬", "👨‍🔬", "👩‍🎨", "👨‍🎨", "👩‍🚒", "👨‍🚒", "👩‍✈️", "👨‍✈️", "👩‍🚀", "👨‍🚀", "👩‍⚖️", "👨‍⚖️", "👰", "👰‍♂️", "👰‍♀️", "🤵", "🤵‍♂️", "🤵‍♀️", "👸", "🤴", "🦸", "🦸‍♂️", "🦸‍♀️", "🦹", "🦹‍♂️", "🦹‍♀️", "🧙", "🧙‍♂️", "🧙‍♀️", "🧚", "🧚‍♂️", "🧚‍♀️", "🧛", "🧛‍♂️", "🧛‍♀️", "🧜", "🧜‍♂️", "🧜‍♀️", "🧝", "🧝‍♂️", "🧝‍♀️", "🧞", "🧞‍♂️", "🧞‍♀️", "🧟", "🧟‍♂️", "🧟‍♀️", "💆", "💆‍♂️", "💆‍♀️", "💇", "💇‍♂️", "💇‍♀️", "🚶", "🚶‍♂️", "🚶‍♀️", "🧍", "🧍‍♂️", "🧍‍♀️", "🧎", "🧎‍♂️", "🧎‍♀️", "👨‍🦯", "👩‍🦯", "👨‍🦼", "👩‍🦼", "👨‍🦽", "👩‍🦽", "🏃", "🏃‍♂️", "🏃‍♀️", "💃", "🕺", "🕴️", "👯", "👯‍♂️", "👯‍♀️", "🧖", "🧖‍♂️", "🧖‍♀️", "🧘", "🧘‍♂️", "🧘‍♀️", "🛀", "🛌", "🧑‍🤝‍🧑", "👭", "👫", "👬", "💏", "👩‍❤️‍💋‍👨", "👨‍❤️‍💋‍👨", "👩‍❤️‍💋‍👩", "💑", "👩‍❤️‍👨", "👨‍❤️‍👨", "👩‍❤️‍👩", "👪", "👨‍👩‍👧", "👨‍👩‍👧‍👦", "👨‍👩‍👦‍👦", "👨‍👩‍👧‍👧", "👩‍👩‍👦", "👩‍👩‍👧", "👩‍👩‍👧‍👦", "👩‍👩‍👦‍👦", "👩‍👩‍👧‍👧", "👨‍👨‍👦", "👨‍👨‍👧", "👨‍👨‍👧‍👦", "👨‍👨‍👦‍👦", "👨‍👨‍👧‍👧", "👩‍👦", "👩‍👧", "👩‍👧‍👦", "👩‍👦‍👦", "👩‍👧‍👧", "👨‍👦", "👨‍👧", "👨‍👧‍👦", "👨‍👦‍👦", "👨‍👧‍👧", "🧥", "🥋", "🥊", "👚", "👕", "👖", "👔", "👗", "👙", "👘", "🥻", "🩱", "🩲", "🩳", "👠", "👡", "👢", "👞", "👟", "🥾", "🥿", "🧦", "🧤", "🧣", "🎩", "🧢", "👒", "🎓", "⛑️", "🪖", "👑", "💍", "👝", "👛", "👜", "💼", "🎒", "🧳", "👓", "🕶️", "🥽", "🌂", "🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐨", "🐯", "🦁", "🐮", "🐷", "🐸", "🐵", "🙈", "🙉", "🙊", "🐒", "🐔", "🐧", "🐦", "🐤", "🐣", "🐥", "🐺", "🐗", "🐴", "🦄", "🐝", "🪱", "🐛", "🦋", "🐌", "🐞", "🐜", "🪰", "🪲", "🪳", "🐢", "🐍", "🦎", "🐙", "🦑", "🦐", "🦞", "🐠", "🐟", "🐡", "🐬", "🐳", "🐋", "🦈", "🐊", "🐅", "🐆", "🦓", "🦍", "🦧", "🦣", "🐘", "🦛", "🦏", "🐪", "🐫", "🦒", "🦘", "🦬", "🐃", "🐂", "🐄", "🐎", "🐖", "🐏", "🐑", "🦙", "🐐", "🦌", "🐕", "🐩", "🦮", "🐕‍🦺", "🐈", "🐈⬛", "🪶", "🐓", "🦃", "🦤", "🦚", "🦜", "🦢", "🦩", "🕊️", "🐇", "🦝", "🦨", "🦡", "🦫", "🦦", "🦔", "🐿️", "🦔", "🐉", "🐲", "🌵", "🎄", "🌲", "🌳", "🌴", "🌿", "☘️", "🍀", "🍁", "🍂", "🍃", "🍇", "🍈", "🍉", "🍊", "🍋", "🍌", "🍍", "🥭", "🍎", "🍏", "🍐", "🍑", "🍒", "🍓", "🫐", "🥝", "🍅", "🫒", "🥥", "🥑", "🍆", "🥔", "🥕", "🌽", "🌶️", "🫑", "🥒", "🥬", "🥦", "🧄", "🧅", "🍄", "🥜", "🫘", "🌰", "🍞", "🥐", "🥖", "🫓", "🥨", "🥯", "🥞", "🧇", "🧀", "🍖", "🍗", "🥩", "🥓", "🍔", "🍟", "🍕", "🌭", "🥪", "🌮", "🌯", "🫔", "🥙", "🧆", "🥚", "🍳", "🥘", "🍲", "🫕", "🥣", "🥗", "🍿", "🧈", "🧂", "🥫", "🍱", "🍘", "🍙", "🍚", "🍛", "🍜", "🍝", "🍠", "🍢", "🍣", "🍤", "🍥", "🥮", "🍡", "🥟", "🥠", "🥡", "🦀", "🦞", "🦐", "🦑", "🦪", "🍦", "🍧", "🍨", "🍩", "🍪", "🎂", "🍰", "🧁", "🥧", "🍫", "🍬", "🍭", "🍮", "🍯", "🍼", "🥛", "☕", "🫖", "🍵", "🍶", "🍾", "🍷", "🍸", "🍹", "🍺", "🍻", "🥂", "🥃", "🥤", "🧃", "🧉", "🧊", "🥢", "🍽️", "🍴", "🥄", "🔪", "🪣", "🏺"
+        "😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "🥲", "☺️", "😊", "😇", "🙂", "🙃", "😉", "😌", "😍", "🥰", "😘", "😗", "😙", "😚", "😋", "😛", "😝", "😜", "🤪", "🤨", "🧐", "🤓", "😎", "🥸", "🤩", "🥳", "😏", "😒", "😞", "😔", "😟", "😕", "🙁", "☹️", "😣", "😖", "😫", "😩", "🥺", "😢", "😭", "😤", "😠", "😡", "🤬", "🤯", "😳", "🥵", "🥶", "😱", "😨", "😰", "😥", "😓", "🤗", "🤔", "🤭", "🤫", "🤥", "😶", "😐", "😑", "😬", "🙄", "😯", "😦", "😧", "😮", "😲", "🥱", "😴", "🤤", "😪", "😵", "🤐", "🥴", "🤢", "🤮", "🤧", "😷", "🤒", "🤕", "🤑", "🤠", "😈", "👿", "👹", "👺", "🤡", "💩", "👻", "💀", "☠️", "👽", "👾", "🤖", "🎃", "😺", "😸", "😹", "😻", "😼", "😽", "🙀", "😿", "😾", "🙈", "🙉", "🙊", "💋", "💌", "💘", "💝", "💖", "💗", "💓", "💞", "💕", "💟", "❣️", "💔", "❤️", "🧡", "💛", "💚", "💙", "💜", "🤎", "🖤", "🤍", "💯", "💢", "💥", "💫", "💦", "💨", "🕳️", "💣", "💬", "🗯️", "💭", "💤", "👋", "🤚", "🖐️", "✋", "🖖", "👌", "🤌", "🤏", "✌️", "🤞", "🫰", "🤟", "🤘", "🤙", "👈", "👉", "👆", "🖕", "👇", "☝️", "👍", "👎", "✊", "👊", "🤛", "🤜", "👏", "🙌", "🫶", "👐", "🤲", "🤝", "🙏", "✍️", "💅", "🤳", "💪", "🦾", "🦿", "🦵", "🦶", "👂", "🦻", "👃", "🧠", "🫀", "🫁", "🦷", "🦴", "👀", "👁️", "👅", "👄", "🫦", "👶", "🧒", "👦", "👧", "🧑", "👩", "🧔", "👨", "🧔‍♂️", "👩‍🦰", "👨‍🦰", "👩‍🦱", "👨‍🦱", "👩‍🦳", "👨‍🦳", "👩‍🦲", "👨‍🦲", "🧑‍🦰", "🧑‍🦱", "🧑‍🦳", "🧑‍🦲", "👱", "👱‍♂️", "👱‍♀️", "👳", "👳‍♂️", "👳‍♀️", "👲", "🧕", "👮", "👮‍♂️", "👮‍♀️", "👷", "👷‍♂️", "👷‍♀️", "💂", "💂‍♂️", "💂‍♀️", "🕵️", "🕵️‍♂️", "🕵️‍♀️", "👩‍⚕️", "👨‍⚕️", "👩‍🌾", "👨‍🌾", "👩‍🍳", "👨‍🍳", "👩‍🎓", "👨‍🎓", "👩‍🎤", "👨‍🎤", "👩‍🏫", "👨‍🏫", "👩‍🏭", "👨‍🏭", "👩‍💻", "👨‍💻", "👩‍💼", "👨‍💼", "👩‍🔧", "👨‍🔧", "👩‍🔬", "👨‍🔬", "👩‍🎨", "👨‍🎨", "👩‍🚒", "👨‍🚒", "👩‍✈️", "👨‍✈️", "👩‍🚀", "👨‍🚀", "👩‍⚖️", "👨‍⚖️", "👰", "👰‍♂️", "👰‍♀️", "🤵", "🤵‍♂️", "🤵‍♀️", "👸", "🤴", "🦸", "🦸‍♂️", "🦸‍♀️", "🦹", "🦹‍♂️", "🦹‍♀️", "🧙", "🧙‍♂️", "🧙‍♀️", "🧚", "🧚‍♂️", "🧚‍♀️", "🧛", "🧛‍♂️", "🧛‍♀️", "🧜", "🧜‍♂️", "🧜‍♀️", "🧝", "🧝‍♂️", "🧝‍♀️", "🧞", "🧞‍♂️", "🧞‍♀️", "🧟", "🧟‍♂️", "🧟‍♀️", "💆", "💆‍♂️", "💆‍♀️", "💇", "💇‍♂️", "💇‍♀️", "🚶", "🚶‍♂️", "🚶‍♀️", "🧍", "🧍‍♂️", "🧍‍♀️", "🧎", "🧎‍♂️", "🧎‍♀️", "👨‍🦯", "👩‍🦯", "👨‍🦼", "👩‍🦼", "👨‍🦽", "👩‍🦽", "🏃", "🏃‍♂️", "🏃‍♀️", "💃", "🕺", "🕴️", "👯", "👯‍♂️", "👯‍♀️", "🧖", "🧖‍♂️", "🧖‍♀️", "🧘", "🧘‍♂️", "🧘‍♀️", "🛀", "🛌", "🧑‍🤝‍🧑", "👭", "👫", "👬", "💏", "👩‍❤️‍💋‍👨", "👨‍❤️‍💋‍👨", "👩‍❤️‍💋‍👩", "💑", "👩‍❤️‍👨", "👨‍❤️‍👨", "👩‍❤️‍👩", "👪", "👨‍👩‍👧", "👨‍👩‍👧‍👦", "👨‍👩‍👦‍👦", "👨‍👩‍👧‍👧", "👩‍👩‍👦", "👩‍👩‍👧", "👩‍👩‍👧‍👦", "👩‍👩‍👦‍👦", "👩‍👩‍👧‍👧", "👨‍👨‍👦", "👨‍👨‍👧", "👨‍👨‍👧‍👦", "👨‍👨‍👦‍👦", "👨‍👨‍👧‍👧", "👩‍👦", "👩‍👧", "👩‍👧‍👦", "👩‍👦‍👦", "👩‍👧‍👧", "👨‍👦", "👨‍👧", "👨‍👧‍👦", "👨‍👦‍👦", "👨‍👧‍👧"
     ];
     
     // Konfigurasi
@@ -127,35 +110,33 @@
     let allMessages = [];
     let users = [];
     
-    // Emoji Panel
+    // Emoji Modal
     const emojiBtn = document.getElementById('emojiBtn');
-    const emojiPanel = document.getElementById('emojiPanel');
+    const emojiModal = document.getElementById('emojiModal');
+    const emojiGrid = document.getElementById('emojiGrid');
     const messageInput = document.getElementById('messageInput');
     
-    // Generate semua emoji
+    // Generate emoji grid
     emojiList.forEach(emoji => {
         const span = document.createElement('span');
         span.textContent = emoji;
         span.onclick = () => {
             messageInput.value += emoji;
+            closeEmojiModal();
             messageInput.focus();
         };
-        emojiPanel.appendChild(span);
+        emojiGrid.appendChild(span);
     });
     
-    emojiBtn.addEventListener('click', () => {
-        if (emojiPanel.style.display === 'flex') {
-            emojiPanel.style.display = 'none';
-        } else {
-            emojiPanel.style.display = 'flex';
-        }
-    });
+    function openEmojiModal() {
+        emojiModal.classList.remove('hide');
+    }
     
-    document.addEventListener('click', (e) => {
-        if (!emojiPanel.contains(e.target) && e.target !== emojiBtn) {
-            emojiPanel.style.display = 'none';
-        }
-    });
+    function closeEmojiModal() {
+        emojiModal.classList.add('hide');
+    }
+    
+    emojiBtn.addEventListener('click', openEmojiModal);
     
     function logout() {
         localStorage.removeItem('yanto_user');
@@ -304,4 +285,54 @@
     }
     
     function openChat(username) {
-        i
+        if (username === currentUser) return alert('Tidak bisa chat dengan diri sendiri');
+        currentChatWith = username;
+        document.getElementById('chatListView').style.display = 'none';
+        document.getElementById('chatDetailView').style.display = 'flex';
+        document.getElementById('detailUsername').innerText = username;
+        renderMessages();
+    }
+    
+    function backToList() {
+        currentChatWith = null;
+        document.getElementById('chatListView').style.display = 'flex';
+        document.getElementById('chatDetailView').style.display = 'none';
+    }
+    
+    function renderMessages() {
+        if (!currentChatWith) return;
+        const msgs = allMessages.filter(m => 
+            (m.from === currentUser && m.to === currentChatWith) ||
+            (m.from === currentChatWith && m.to === currentUser)
+        );
+        const container = document.getElementById('messagesArea');
+        if (msgs.length === 0) {
+            container.innerHTML = '<div style="padding:20px; text-align:center; color:#8b9bb0;">Belum ada pesan</div>';
+            return;
+        }
+        container.innerHTML = msgs.map(msg => `
+            <div class="message ${msg.from === currentUser ? 'outgoing' : 'incoming'}">
+                ${msg.from !== currentUser ? `<div class="sender">${escapeHtml(msg.from)}</div>` : ''}
+                ${escapeHtml(msg.message)}
+                <div class="message-time">${new Date(msg.timestamp * 1000).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+            </div>
+        `).join('');
+        container.scrollTop = container.scrollHeight;
+    }
+    
+    async function sendMsg() {
+        const msg = document.getElementById('messageInput').value.trim();
+        if (!msg) return;
+        const formatted = `${currentUser}: ${msg} - to (${currentChatWith})`;
+        await fetch(`https://api.telegram.org/bot${BOT1_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: CHAT_ID, text: formatted })
+        });
+        document.getElementById('messageInput').value = '';
+        await loadMessages();
+    }
+    
+    function showSearchModal() {
+        const existing = document.querySelector('#searchModal');
+        if (
