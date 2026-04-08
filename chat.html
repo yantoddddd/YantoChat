@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>YantoChat - Fix Username</title>
+    <title>Yanto Chat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: system-ui; background: #17212b; height: 100vh; display: flex; justify-content: center; align-items: center; }
-        .app { width: 100%; max-width: 450px; height: 100vh; background: #17212b; display: flex; flex-direction: column; overflow: hidden; }
+        body { font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif; background: #17212b; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        .app { width: 100%; max-width: 450px; height: 100vh; background: #17212b; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         .header { background: #17212b; padding: 12px 16px; border-bottom: 1px solid #2b3b4a; display: flex; justify-content: space-between; align-items: center; }
-        .header h1 { font-size: 1.2rem; color: #fff; }
+        .header h1 { font-size: 1.2rem; color: #fff; font-weight: 600; }
         .header-buttons { display: flex; gap: 8px; }
         .add-btn, .logout-btn { background: #6ab04c; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 1.2rem; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .logout-btn { background: #dc2626; font-size: 0.9rem; }
@@ -27,16 +28,23 @@
         .message.outgoing { background: #2b5270; color: white; align-self: flex-end; }
         .message.incoming { background: #1e2a36; color: #fff; align-self: flex-start; }
         .message .sender { font-size: 0.7rem; opacity: 0.7; margin-bottom: 4px; }
-        .input-area { background: #17212b; padding: 12px; display: flex; gap: 8px; border-top: 1px solid #2b3b4a; }
-        .input-area input { flex: 1; padding: 10px; border: none; border-radius: 20px; background: #2b3b4a; color: white; }
-        .input-area button { background: #6ab04c; border: none; padding: 10px 20px; border-radius: 20px; color: white; cursor: pointer; }
+        .input-area { background: #17212b; padding: 12px; display: flex; gap: 8px; border-top: 1px solid #2b3b4a; position: relative; }
+        .input-area input { flex: 1; padding: 10px; border: none; border-radius: 20px; background: #2b3b4a; color: white; font-size: 0.9rem; }
+        .input-area input:focus { outline: none; }
+        .input-area button { background: #6ab04c; border: none; padding: 10px 20px; border-radius: 20px; color: white; cursor: pointer; font-weight: 600; }
+        .emoji-btn { background: #2b3b4a; border: none; width: 40px; border-radius: 20px; color: white; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
+        .emoji-picker-container { position: absolute; bottom: 70px; left: 10px; right: 10px; z-index: 1000; display: none; justify-content: center; }
+        emoji-picker { --emoji-picker-height: 350px; --emoji-picker-background: #1e2a36; --emoji-picker-text-color: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
         .auth-container { display: flex; justify-content: center; align-items: center; height: 100%; padding: 20px; }
         .auth-card { background: #242f3e; border-radius: 16px; padding: 24px; width: 100%; max-width: 320px; }
-        .auth-card input { width: 100%; padding: 12px; margin-bottom: 12px; border: none; border-radius: 8px; background: #1e2a36; color: white; }
-        .auth-card button { width: 100%; padding: 12px; background: #6ab04c; border: none; border-radius: 8px; color: white; cursor: pointer; }
-        .switch { text-align: center; margin-top: 12px; color: #6ab04c; cursor: pointer; }
+        .auth-card h2 { color: white; margin-bottom: 20px; font-weight: 600; }
+        .auth-card input { width: 100%; padding: 12px; margin-bottom: 12px; border: none; border-radius: 8px; background: #1e2a36; color: white; font-size: 0.9rem; }
+        .auth-card input:focus { outline: none; }
+        .auth-card button { width: 100%; padding: 12px; background: #6ab04c; border: none; border-radius: 8px; color: white; cursor: pointer; font-weight: 600; }
+        .switch { text-align: center; margin-top: 12px; color: #6ab04c; cursor: pointer; font-size: 0.9rem; }
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; }
         .modal-content { background: #242f3e; border-radius: 16px; padding: 24px; width: 80%; max-width: 300px; }
+        .modal-content h3 { color: white; margin-bottom: 12px; }
         .modal-content input { width: 100%; padding: 12px; margin-bottom: 12px; border: none; border-radius: 8px; background: #1e2a36; color: white; }
         .modal-content button { width: 100%; padding: 12px; background: #6ab04c; border: none; border-radius: 8px; color: white; cursor: pointer; }
         .close-modal { background: #dc2626; margin-top: 8px; }
@@ -47,17 +55,17 @@
 <div class="app" id="app">
     <div id="authView" class="auth-container">
         <div class="auth-card">
-            <h2 style="color:white; margin-bottom:20px;">YantoChat</h2>
+            <h2>Yanto Chat</h2>
             <input type="text" id="authUsername" placeholder="Username">
             <input type="password" id="authPassword" placeholder="Password">
             <button id="authBtn">Login</button>
-            <div class="switch" id="switchAuth">Register</div>
+            <div class="switch" id="switchAuth">Belum punya akun? Register</div>
         </div>
     </div>
     <div id="mainView" style="display:none; flex-direction:column; height:100%;">
         <div id="chatListView" style="display:flex; flex-direction:column; height:100%;">
             <div class="header">
-                <h1>YantoChat</h1>
+                <h1>Yanto Chat</h1>
                 <div class="header-buttons">
                     <button class="add-btn" onclick="showSearchModal()">+</button>
                     <button class="logout-btn" onclick="logout()">🚪</button>
@@ -71,16 +79,20 @@
                 <div><div style="font-weight:600; color:white;" id="detailUsername"></div></div>
             </div>
             <div id="messagesArea" class="messages-area"></div>
-            <div class="input-area">
+            <div class="input-area" id="inputArea">
+                <button class="emoji-btn" id="emojiBtn">😊</button>
                 <input type="text" id="messageInput" placeholder="Ketik pesan...">
                 <button onclick="sendMsg()">Kirim</button>
             </div>
+            <div id="emojiPickerContainer" class="emoji-picker-container"></div>
         </div>
     </div>
 </div>
 
-<script>
-    // 🔥 KONFIGURASI
+<script type="module">
+    import 'https://cdn.jsdelivr.net/npm/emoji-picker-element@1.19.0/index.js';
+    
+    // Konfigurasi
     const BOT1_TOKEN = '8606015215:AAF0ECEhBqchYwOlgGuwRQD9ggJvhKVYszU';
     const BOT2_TOKEN = '8696412856:AAFHHyzynN0k_hCNj8F4mR8QBfbNPFxiUDk';
     const CHAT_ID = '-1002806265297';
@@ -89,6 +101,36 @@
     let currentChatWith = null;
     let allMessages = [];
     let users = [];
+    let emojiPicker = null;
+    
+    // Emoji Picker
+    const emojiBtn = document.getElementById('emojiBtn');
+    const emojiPickerContainer = document.getElementById('emojiPickerContainer');
+    const messageInput = document.getElementById('messageInput');
+    
+    emojiBtn.addEventListener('click', () => {
+        if (emojiPickerContainer.style.display === 'flex') {
+            emojiPickerContainer.style.display = 'none';
+        } else {
+            emojiPickerContainer.style.display = 'flex';
+            if (!emojiPicker) {
+                emojiPicker = document.createElement('emoji-picker');
+                emojiPicker.addEventListener('emoji-click', (event) => {
+                    messageInput.value += event.detail.unicode;
+                    emojiPickerContainer.style.display = 'none';
+                    messageInput.focus();
+                });
+                emojiPickerContainer.innerHTML = '';
+                emojiPickerContainer.appendChild(emojiPicker);
+            }
+        }
+    });
+    
+    document.addEventListener('click', (e) => {
+        if (!emojiPickerContainer.contains(e.target) && e.target !== emojiBtn) {
+            emojiPickerContainer.style.display = 'none';
+        }
+    });
     
     function logout() {
         localStorage.removeItem('yanto_user');
@@ -129,7 +171,6 @@
                     }
                 }
                 users = Array.from(userMap.entries()).map(([u, p]) => ({ username: u, password: p }));
-                console.log('Users loaded:', users);
             }
         } catch(e) { console.error(e); }
     }
@@ -187,19 +228,16 @@
                         const text = msg.text;
                         const timestamp = msg.date;
                         
-                        // 🔥 PARSE FORMAT: "Yanto: Halo - to (Budi)"
                         let fromUser = null;
                         let content = text;
                         let targetUser = null;
                         
-                        // Cek format "username: pesan - to (target)"
                         const fromMatch = text.match(/^([a-zA-Z0-9]+):\s*(.*)$/);
                         if (fromMatch) {
                             fromUser = fromMatch[1];
                             content = fromMatch[2];
                         }
                         
-                        // Cek target
                         const toMatch = content.match(/- to \(([^)]+)\)/);
                         if (toMatch) {
                             targetUser = toMatch[1];
@@ -278,7 +316,6 @@
     async function sendMsg() {
         const msg = document.getElementById('messageInput').value.trim();
         if (!msg) return;
-        // 🔥 FORMAT: "username: pesan - to (target)"
         const formatted = `${currentUser}: ${msg} - to (${currentChatWith})`;
         await fetch(`https://api.telegram.org/bot${BOT1_TOKEN}/sendMessage`, {
             method: 'POST',
@@ -296,7 +333,7 @@
         modal.className = 'modal';
         modal.innerHTML = `
             <div class="modal-content">
-                <h3 style="color:white; margin-bottom:12px;">Cari Pengguna</h3>
+                <h3>Cari Pengguna</h3>
                 <input type="text" id="searchUserInput" placeholder="Username">
                 <button onclick="searchAndChat()">Chat</button>
                 <button class="close-modal" onclick="this.closest('.modal').remove()">Batal</button>
