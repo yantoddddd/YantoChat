@@ -10,7 +10,9 @@
         .app { width: 100%; max-width: 450px; height: 100vh; background: #17212b; display: flex; flex-direction: column; overflow: hidden; }
         .header { background: #17212b; padding: 12px 16px; border-bottom: 1px solid #2b3b4a; display: flex; justify-content: space-between; align-items: center; }
         .header h1 { font-size: 1.2rem; color: #fff; }
-        .add-btn { background: #6ab04c; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 1.2rem; color: white; cursor: pointer; }
+        .header-buttons { display: flex; gap: 8px; }
+        .add-btn, .logout-btn { background: #6ab04c; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 1.2rem; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .logout-btn { background: #dc2626; font-size: 0.9rem; }
         .chat-list { flex: 1; overflow-y: auto; }
         .chat-item { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid #2b3b4a; cursor: pointer; }
         .avatar { width: 48px; height: 48px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; margin-right: 12px; }
@@ -55,7 +57,10 @@
         <div id="chatListView" style="display:flex; flex-direction:column; height:100%;">
             <div class="header">
                 <h1>YantoChat</h1>
-                <button class="add-btn" onclick="showSearchModal()">+</button>
+                <div class="header-buttons">
+                    <button class="add-btn" onclick="showSearchModal()">+</button>
+                    <button class="logout-btn" onclick="logout()">🚪</button>
+                </div>
             </div>
             <div id="chatList" class="chat-list"></div>
         </div>
@@ -77,12 +82,26 @@
     // 🔥 KONFIGURASI FINAL
     const BOT1_TOKEN = '8606015215:AAF0ECEhBqchYwOlgGuwRQD9ggJvhKVYszU';  // Pengirim
     const BOT2_TOKEN = '8696412856:AAFHHyzynN0k_hCNj8F4mR8QBfbNPFxiUDk';  // Pembaca
-    const CHAT_ID = '-1002806265297';  // 🔥 CHANNEL ID BARU
+    const CHAT_ID = '-1002806265297';  // CHANNEL ID
     
     let currentUser = null;
     let currentChatWith = null;
     let allMessages = [];
     let users = [];
+    
+    // Logout function
+    function logout() {
+        localStorage.removeItem('yanto_user');
+        currentUser = null;
+        currentChatWith = null;
+        document.getElementById('mainView').style.display = 'none';
+        document.getElementById('authView').style.display = 'flex';
+        document.getElementById('authUsername').value = '';
+        document.getElementById('authPassword').value = '';
+        // Reset button ke mode Login
+        document.getElementById('authBtn').innerText = 'Login';
+        document.getElementById('switchAuth').innerText = 'Belum punya akun? Register';
+    }
     
     // Cek session di localStorage
     function checkSession() {
