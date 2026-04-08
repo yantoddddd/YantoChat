@@ -32,6 +32,16 @@
             align-items: center;
         }
         .header h1 { font-size: 1.2rem; color: #fff; }
+        .add-btn {
+            background: #6ab04c;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            color: white;
+            cursor: pointer;
+        }
         .chat-list {
             flex: 1;
             overflow-y: auto;
@@ -158,6 +168,47 @@
             cursor: pointer;
         }
         .switch { text-align: center; margin-top: 12px; color: #6ab04c; cursor: pointer; }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #242f3e;
+            border-radius: 16px;
+            padding: 24px;
+            width: 80%;
+            max-width: 300px;
+        }
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #1e2a36;
+            color: white;
+        }
+        .modal-content button {
+            width: 100%;
+            padding: 12px;
+            background: #6ab04c;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+        }
+        .close-modal {
+            background: #dc2626;
+            margin-top: 8px;
+        }
         .hide { display: none; }
     </style>
 </head>
@@ -174,7 +225,10 @@
     </div>
     <div id="mainView" style="display:none; flex-direction:column; height:100%;">
         <div id="chatListView" style="display:flex; flex-direction:column; height:100%;">
-            <div class="header"><h1>YantoChat</h1></div>
+            <div class="header">
+                <h1>YantoChat</h1>
+                <button class="add-btn" onclick="showSearchModal()">+</button>
+            </div>
             <div id="chatList" class="chat-list"></div>
         </div>
         <div id="chatDetailView" class="chat-detail">
@@ -200,8 +254,6 @@
     let currentUser = null;
     let currentChatWith = null;
     let allMessages = [];
-    
-    // Simulasi database user (pake localStorage)
     let users = JSON.parse(localStorage.getItem('users') || '[]');
     
     function saveUsers() { localStorage.setItem('users', JSON.stringify(users)); }
@@ -284,10 +336,11 @@
                 </div>
             </div>
         `).join('');
-        if (chats.length === 0) container.innerHTML = '<div style="padding:20px; text-align:center; color:#8b9bb0;">Belum ada chat</div>';
+        if (chats.length === 0) container.innerHTML = '<div style="padding:20px; text-align:center; color:#8b9bb0;">Belum ada chat. Klik + untuk cari teman</div>';
     }
     
     function openChat(username) {
+        if (username === currentUser) return alert('Tidak bisa chat dengan diri sendiri');
         currentChatWith = username;
         document.getElementById('chatListView').style.display = 'none';
         document.getElementById('chatDetailView').style.display = 'flex';
@@ -332,6 +385,36 @@
         } catch(e) { console.error(e); }
     }
     
+    function showSearchModal() {
+        const existing = document.querySelector('.modal');
+        if (existing) existing.remove();
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3 style="color:white; margin-bottom:12px;">Cari Pengguna</h3>
+                <input type="text" id="searchUserInput" placeholder="Username">
+                <button onclick="searchAndChat()">Chat</button>
+                <button class="close-modal" onclick="this.closest('.modal').remove()">Batal</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    function searchAndChat() {
+        const searchInput = document.querySelector('#searchUserInput');
+        const targetUser = searchInput.value.trim();
+        if (!targetUser) return alert('Masukkan username');
+        if (targetUser === currentUser) return alert('Tidak bisa chat dengan diri sendiri');
+        
+        const userExists = users.find(u => u.username === targetUser);
+        if (!userExists) return alert(`User "${targetUser}" tidak ditemukan`);
+        
+        document.querySelector('.modal').remove();
+        openChat(targetUser);
+    }
+    
     function escapeHtml(str) {
         const div = document.createElement('div');
         div.textContent = str;
@@ -339,4 +422,4 @@
     }
 </script>
 </body>
-</html>
+                         </html>
