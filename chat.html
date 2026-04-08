@@ -4,50 +4,310 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Yanto Chat</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif; background: #17212b; height: 100vh; display: flex; justify-content: center; align-items: center; }
-        .app { width: 100%; max-width: 450px; height: 100vh; background: #17212b; display: flex; flex-direction: column; overflow: hidden; position: relative; }
-        .header { background: #17212b; padding: 12px 16px; border-bottom: 1px solid #2b3b4a; display: flex; justify-content: space-between; align-items: center; }
-        .header h1 { font-size: 1.2rem; color: #fff; font-weight: 600; }
-        .header-buttons { display: flex; gap: 8px; }
-        .add-btn, .logout-btn { background: #6ab04c; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 1.2rem; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .logout-btn { background: #dc2626; font-size: 0.9rem; }
-        .chat-list { flex: 1; overflow-y: auto; }
-        .chat-item { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid #2b3b4a; cursor: pointer; }
-        .avatar { width: 48px; height: 48px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; margin-right: 12px; }
-        .chat-info { flex: 1; }
-        .chat-name { font-weight: 600; color: #fff; }
-        .chat-preview { font-size: 0.8rem; color: #8b9bb0; }
-        .chat-detail { display: none; flex-direction: column; height: 100%; }
-        .chat-detail-header { background: #17212b; padding: 12px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #2b3b4a; }
-        .back-btn { background: none; border: none; color: #6ab04c; font-size: 1.2rem; cursor: pointer; }
-        .messages-area { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
-        .message { max-width: 80%; padding: 8px 12px; border-radius: 12px; font-size: 0.9rem; }
-        .message.outgoing { background: #2b5270; color: white; align-self: flex-end; }
-        .message.incoming { background: #1e2a36; color: #fff; align-self: flex-start; }
-        .message .sender { font-size: 0.7rem; opacity: 0.7; margin-bottom: 4px; }
-        .input-area { background: #17212b; padding: 12px; display: flex; gap: 8px; border-top: 1px solid #2b3b4a; position: relative; }
-        .input-area input { flex: 1; padding: 10px; border: none; border-radius: 20px; background: #2b3b4a; color: white; font-size: 0.9rem; }
-        .input-area input:focus { outline: none; }
-        .input-area button { background: #6ab04c; border: none; padding: 10px 20px; border-radius: 20px; color: white; cursor: pointer; font-weight: 600; }
-        .emoji-btn { background: #2b3b4a; border: none; width: 40px; border-radius: 20px; color: white; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
-        .emoji-picker-container { position: absolute; bottom: 70px; left: 10px; right: 10px; z-index: 1000; display: none; justify-content: center; }
-        emoji-picker { --emoji-picker-height: 350px; --emoji-picker-background: #1e2a36; --emoji-picker-text-color: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
-        .auth-container { display: flex; justify-content: center; align-items: center; height: 100%; padding: 20px; }
-        .auth-card { background: #242f3e; border-radius: 16px; padding: 24px; width: 100%; max-width: 320px; }
-        .auth-card h2 { color: white; margin-bottom: 20px; font-weight: 600; }
-        .auth-card input { width: 100%; padding: 12px; margin-bottom: 12px; border: none; border-radius: 8px; background: #1e2a36; color: white; font-size: 0.9rem; }
-        .auth-card input:focus { outline: none; }
-        .auth-card button { width: 100%; padding: 12px; background: #6ab04c; border: none; border-radius: 8px; color: white; cursor: pointer; font-weight: 600; }
-        .switch { text-align: center; margin-top: 12px; color: #6ab04c; cursor: pointer; font-size: 0.9rem; }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: #242f3e; border-radius: 16px; padding: 24px; width: 80%; max-width: 300px; }
-        .modal-content h3 { color: white; margin-bottom: 12px; }
-        .modal-content input { width: 100%; padding: 12px; margin-bottom: 12px; border: none; border-radius: 8px; background: #1e2a36; color: white; }
-        .modal-content button { width: 100%; padding: 12px; background: #6ab04c; border: none; border-radius: 8px; color: white; cursor: pointer; }
-        .close-modal { background: #dc2626; margin-top: 8px; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            background: #17212b;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .app {
+            width: 100%;
+            max-width: 450px;
+            height: 100vh;
+            background: #17212b;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+        .header {
+            background: #17212b;
+            padding: 12px 16px;
+            border-bottom: 1px solid #2b3b4a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            font-size: 1.2rem;
+            color: #fff;
+            font-weight: 600;
+        }
+        .header-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        .add-btn, .logout-btn {
+            background: #6ab04c;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .logout-btn {
+            background: #dc2626;
+            font-size: 0.9rem;
+        }
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+        .chat-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid #2b3b4a;
+            cursor: pointer;
+        }
+        .avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            margin-right: 12px;
+        }
+        .chat-info {
+            flex: 1;
+        }
+        .chat-name {
+            font-weight: 600;
+            color: #fff;
+        }
+        .chat-preview {
+            font-size: 0.8rem;
+            color: #8b9bb0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .chat-detail {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+        .chat-detail-header {
+            background: #17212b;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #2b3b4a;
+        }
+        .back-btn {
+            background: none;
+            border: none;
+            color: #6ab04c;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .messages-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .message {
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            word-break: break-word;
+        }
+        .message.outgoing {
+            background: #2b5270;
+            color: white;
+            align-self: flex-end;
+        }
+        .message.incoming {
+            background: #1e2a36;
+            color: #fff;
+            align-self: flex-start;
+        }
+        .message .sender {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-bottom: 4px;
+        }
+        .input-area {
+            background: #17212b;
+            padding: 12px;
+            display: flex;
+            gap: 8px;
+            border-top: 1px solid #2b3b4a;
+            position: relative;
+            flex-wrap: wrap;
+        }
+        .input-row {
+            display: flex;
+            gap: 8px;
+            flex: 1;
+        }
+        .input-area input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 20px;
+            background: #2b3b4a;
+            color: white;
+            font-size: 0.9rem;
+        }
+        .input-area input:focus {
+            outline: none;
+        }
+        .input-area button {
+            background: #6ab04c;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .emoji-btn {
+            background: #2b3b4a;
+            border: none;
+            width: 40px;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .emoji-panel {
+            display: none;
+            background: #1e2a36;
+            border-radius: 16px;
+            padding: 12px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+            gap: 8px;
+            width: 100%;
+            border: 1px solid #2b3b4a;
+        }
+        .emoji-panel span {
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+        .emoji-panel span:hover {
+            background: #2b3b4a;
+        }
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 20px;
+        }
+        .auth-card {
+            background: #242f3e;
+            border-radius: 16px;
+            padding: 24px;
+            width: 100%;
+            max-width: 320px;
+        }
+        .auth-card h2 {
+            color: white;
+            margin-bottom: 20px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .auth-card input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #1e2a36;
+            color: white;
+            font-size: 0.9rem;
+        }
+        .auth-card input:focus {
+            outline: none;
+        }
+        .auth-card button {
+            width: 100%;
+            padding: 12px;
+            background: #6ab04c;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .switch {
+            text-align: center;
+            margin-top: 12px;
+            color: #6ab04c;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #242f3e;
+            border-radius: 16px;
+            padding: 24px;
+            width: 80%;
+            max-width: 300px;
+        }
+        .modal-content h3 {
+            color: white;
+            margin-bottom: 12px;
+        }
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #1e2a36;
+            color: white;
+        }
+        .modal-content button {
+            width: 100%;
+            padding: 12px;
+            background: #6ab04c;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+        }
+        .close-modal {
+            background: #dc2626;
+            margin-top: 8px;
+        }
         .hide { display: none; }
     </style>
 </head>
@@ -79,19 +339,27 @@
                 <div><div style="font-weight:600; color:white;" id="detailUsername"></div></div>
             </div>
             <div id="messagesArea" class="messages-area"></div>
-            <div class="input-area" id="inputArea">
-                <button class="emoji-btn" id="emojiBtn">😊</button>
-                <input type="text" id="messageInput" placeholder="Ketik pesan...">
-                <button onclick="sendMsg()">Kirim</button>
+            <div class="input-area">
+                <div class="input-row">
+                    <button class="emoji-btn" id="emojiBtn">😊</button>
+                    <input type="text" id="messageInput" placeholder="Ketik pesan...">
+                    <button onclick="sendMsg()">Kirim</button>
+                </div>
+                <div id="emojiPanel" class="emoji-panel">
+                    <span>😀</span> <span>😂</span> <span>😍</span> <span>🥰</span> <span>😎</span>
+                    <span>😭</span> <span>😡</span> <span>👍</span> <span>🙏</span> <span>🔥</span>
+                    <span>💀</span> <span>😹</span> <span>🗿</span> <span>😈</span> <span>👹</span>
+                    <span>🤡</span> <span>🥶</span> <span>🥵</span> <span>✨</span> <span>🎉</span>
+                    <span>❤️</span> <span>💔</span> <span>💯</span> <span>💀</span> <span>😱</span>
+                    <span>🤔</span> <span>😴</span> <span>🤤</span> <span>🥴</span> <span>🫡</span>
+                    <span>🤝</span> <span>👊</span> <span>💪</span> <span>👀</span> <span>💩</span>
+                </div>
             </div>
-            <div id="emojiPickerContainer" class="emoji-picker-container"></div>
         </div>
     </div>
 </div>
 
-<script type="module">
-    import 'https://cdn.jsdelivr.net/npm/emoji-picker-element@1.19.0/index.js';
-    
+<script>
     // Konfigurasi
     const BOT1_TOKEN = '8606015215:AAF0ECEhBqchYwOlgGuwRQD9ggJvhKVYszU';
     const BOT2_TOKEN = '8696412856:AAFHHyzynN0k_hCNj8F4mR8QBfbNPFxiUDk';
@@ -101,35 +369,25 @@
     let currentChatWith = null;
     let allMessages = [];
     let users = [];
-    let emojiPicker = null;
     
-    // Emoji Picker
+    // Emoji Panel Toggle
     const emojiBtn = document.getElementById('emojiBtn');
-    const emojiPickerContainer = document.getElementById('emojiPickerContainer');
+    const emojiPanel = document.getElementById('emojiPanel');
     const messageInput = document.getElementById('messageInput');
     
     emojiBtn.addEventListener('click', () => {
-        if (emojiPickerContainer.style.display === 'flex') {
-            emojiPickerContainer.style.display = 'none';
+        if (emojiPanel.style.display === 'flex') {
+            emojiPanel.style.display = 'none';
         } else {
-            emojiPickerContainer.style.display = 'flex';
-            if (!emojiPicker) {
-                emojiPicker = document.createElement('emoji-picker');
-                emojiPicker.addEventListener('emoji-click', (event) => {
-                    messageInput.value += event.detail.unicode;
-                    emojiPickerContainer.style.display = 'none';
-                    messageInput.focus();
-                });
-                emojiPickerContainer.innerHTML = '';
-                emojiPickerContainer.appendChild(emojiPicker);
-            }
+            emojiPanel.style.display = 'flex';
         }
     });
     
-    document.addEventListener('click', (e) => {
-        if (!emojiPickerContainer.contains(e.target) && e.target !== emojiBtn) {
-            emojiPickerContainer.style.display = 'none';
-        }
+    document.querySelectorAll('.emoji-panel span').forEach(emoji => {
+        emoji.addEventListener('click', () => {
+            messageInput.value += emoji.textContent;
+            messageInput.focus();
+        });
     });
     
     function logout() {
@@ -171,6 +429,7 @@
                     }
                 }
                 users = Array.from(userMap.entries()).map(([u, p]) => ({ username: u, password: p }));
+                console.log('Users loaded:', users);
             }
         } catch(e) { console.error(e); }
     }
@@ -306,61 +565,4 @@
         container.innerHTML = msgs.map(msg => `
             <div class="message ${msg.from === currentUser ? 'outgoing' : 'incoming'}">
                 ${msg.from !== currentUser ? `<div class="sender">${escapeHtml(msg.from)}</div>` : ''}
-                ${escapeHtml(msg.message)}
-                <div class="message-time">${new Date(msg.timestamp * 1000).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
-            </div>
-        `).join('');
-        container.scrollTop = container.scrollHeight;
-    }
-    
-    async function sendMsg() {
-        const msg = document.getElementById('messageInput').value.trim();
-        if (!msg) return;
-        const formatted = `${currentUser}: ${msg} - to (${currentChatWith})`;
-        await fetch(`https://api.telegram.org/bot${BOT1_TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: CHAT_ID, text: formatted })
-        });
-        document.getElementById('messageInput').value = '';
-        await loadMessages();
-    }
-    
-    function showSearchModal() {
-        const existing = document.querySelector('.modal');
-        if (existing) existing.remove();
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.innerHTML = `
-            <div class="modal-content">
-                <h3>Cari Pengguna</h3>
-                <input type="text" id="searchUserInput" placeholder="Username">
-                <button onclick="searchAndChat()">Chat</button>
-                <button class="close-modal" onclick="this.closest('.modal').remove()">Batal</button>
-            </div>
-        `;
-        document.body.appendChild(modal);
-    }
-    
-    async function searchAndChat() {
-        const searchInput = document.querySelector('#searchUserInput');
-        const targetUser = searchInput.value.trim();
-        if (!targetUser) return alert('Masukkan username');
-        if (targetUser === currentUser) return alert('Tidak bisa chat dengan diri sendiri');
-        await loadUsersFromTelegram();
-        const userExists = users.find(u => u.username === targetUser);
-        if (!userExists) return alert(`User "${targetUser}" tidak ditemukan`);
-        document.querySelector('.modal').remove();
-        openChat(targetUser);
-    }
-    
-    function escapeHtml(str) {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
-    }
-    
-    checkSession();
-</script>
-</body>
-</html>
+                ${escapeHtml(msg.mess
