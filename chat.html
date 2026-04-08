@@ -43,6 +43,7 @@
         .modal-content button { width: 100%; padding: 12px; background: #6ab04c; border: none; border-radius: 8px; color: white; cursor: pointer; font-weight: 600; margin-bottom: 8px; }
         .close-modal-btn { background: #dc2626; margin-top: 8px; }
         .hide { display: none; }
+        .error { color: #ef4444; text-align: center; margin-top: 8px; font-size: 0.8rem; }
     </style>
 </head>
 <body>
@@ -92,6 +93,22 @@
     let allMessages = [];
     let users = [];
     
+    async function sendToTelegram(text) {
+        await fetch(`https://api.telegram.org/bot${BOT1_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: CHAT_ID, text })
+        });
+    }
+    
+    async function deleteUserFromTelegram(username) {
+        await sendToTelegram(`DELETE:${username}`);
+    }
+    
+    async function registerToTelegram(username, password) {
+        await sendToTelegram(`REGISTER:${username}:${password}`);
+    }
+    
     function showProfileModal() {
         let modal = document.querySelector('#profileModal');
         if (modal) modal.remove();
@@ -102,7 +119,9 @@
         modal.innerHTML = `
             <div class="modal-content">
                 <h3>Profile - ${escapeHtml(currentUser)}</h3>
+                <input type="password" id="oldPassword" placeholder="Password Lama">
                 <input type="password" id="newPassword" placeholder="Password Baru">
+                <div id="profileError" class="error"></div>
                 <button onclick="changePassword()">Ubah Password</button>
                 <button class="close-modal-btn" onclick="logout()">Logout</button>
                 <button class="close-modal-btn" onclick="this.parentElement.parentElement.remove()">Tutup</button>
@@ -112,19 +131,49 @@
     }
     
     async function changePassword() {
+        const oldPassword = document.querySelector('#oldPassword')?.value.trim();
         const newPassword = document.querySelector('#newPassword')?.value.trim();
-        if (!newPassword) {
-            alert('Masukkan password baru!');
+        const errorDiv = document.querySelector('#profileError');
+        
+        if (!oldPassword || !newPassword) {
+            errorDiv.textContent = 'Masukkan password lama dan baru!';
             return;
         }
         
-        const userIndex = users.findIndex(u => u.username === currentUser);
-        if (userIndex !== -1) {
-            users[userIndex].password = newPassword;
-            localStorage.setItem('users', JSON.stringify(users));
+        // Validasi password lama
+        const user = users.find(u => u.username === currentUser);
+        if (!user || user.password !== oldPassword) {
+            errorDiv.textContent = 'Password lama salah!';
+            return;
+        }
+        
+        if (newPassword.length < 3) {
+            errorDiv.textContent = 'Password baru minimal 3 karakter!';
+            return;
+        }
+        
+        errorDiv.textContent = '';
+        
+        try {
+            // 1. Hapus akun lama di Telegram
+            await deleteUserFromTelegram(currentUser);
+            
+            // 2. Daftarkan ulang dengan password baru
             await registerToTelegram(currentUser, newPassword);
+            
+            // 3. Update localStorage
+            const userIndex = users.findIndex(u => u.username === currentUser);
+            if (userIndex !== -1) {
+                users[userIndex].password = newPassword;
+                localStorage.setItem('users', JSON.stringify(users));
+            }
+            
             alert('Password berhasil diubah! Silakan login ulang.');
             logout();
+            
+        } catch (err) {
+            errorDiv.textContent = 'Gagal mengubah password. Coba lagi.';
+            console.error(err);
         }
     }
     
@@ -172,15 +221,6 @@
         } catch(e) { console.error(e); }
     }
     
-    async function registerToTelegram(username, password) {
-        const text = `REGISTER:${username}:${password}`;
-        await fetch(`https://api.telegram.org/bot${BOT1_TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: CHAT_ID, text })
-        });
-    }
-    
     document.getElementById('authBtn').onclick = async () => {
         const username = document.getElementById('authUsername').value.trim();
         const password = document.getElementById('authPassword').value;
@@ -222,7 +262,7 @@
                 const msgs = [];
                 for (const update of data.result) {
                     const msg = update.message;
-                    if (msg && msg.text && !msg.text.startsWith('REGISTER:')) {
+                    if (msg && msg.text && !msg.text.startsWith('REGISTER:') && !msg.text.startsWith('DELETE:')) {
                         const text = msg.text;
                         const timestamp = msg.date;
                         let fromUser = null;
@@ -361,16 +401,4 @@
     }
     
     // Attach global functions
-    window.changePassword = changePassword;
-    window.logout = logout;
-    window.showProfileModal = showProfileModal;
-    window.showSearchModal = showSearchModal;
-    window.searchAndChat = searchAndChat;
-    window.sendMsg = sendMsg;
-    window.openChat = openChat;
-    window.backToList = backToList;
-    
-    checkSession();
-</script>
-</body>
-    </html>
+    window
